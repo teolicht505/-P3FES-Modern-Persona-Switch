@@ -1,0 +1,103 @@
+set PersonaSwitchFlagSet 0x009D58C0
+set OneMoreLockPersonaSwitch 0x009D5900
+set SavePreviousPersonaBeforeSwitch 0x009D5940
+set ResetFlagsOnFullNewTurn 0x009D5980
+
+// Persona switch flag (0x009D58B0)
+// First persona before switch (0x009D58B4)
+
+ASM_START 0x00297720
+    j 0x009D58C0
+    nop
+ASM_END
+
+ASM_START PersonaSwitchFlagSet
+    lui $v1, 0x009d
+    lb $v0, 0x58B0($v1) // Get switch flag
+
+    beq $v0, $zero, skipSamePersonaCheck
+    nop
+
+    lui $v0, 0x83
+    lh $v0, 0x6ba8($v0) // Get current persona index
+    lui $v1, 0x009d
+    lh $v1, 0x58B4($v1) // Get saved persona index
+
+    beq $v0, $v1, resetSwitchFlag // Reset flag if current persona we'll change is the one we originally had before switching
+    addiu $v0, $zero, 0x0
+
+    skipSamePersonaCheck: addiu $v0, $zero, 0x1
+    resetSwitchFlag: lui $v1, 0x009d
+    sb $v0, 0x58B0($v1) // Set switch flag
+
+    j 0x0029772C
+    nop
+ASM_END
+
+
+ASM_START 0x002D7F44
+    j 0x009D5900
+    addiu $v0, $v0, 0x1
+ASM_END
+
+ASM_START OneMoreLockPersonaSwitch
+    sb $v0, 0x28($v1)
+
+    lui $v1, 0x009d
+    lb $v1, 0x58B0($v1) // Load persona switch flag
+
+    beq $v1, $zero, skipPersonaLock
+    nop
+
+    lw $v1, 0x0($a0) // Lock persona switch
+    lhu $v0, 0x18($v1)
+    andi $v0, $v0, 0xfbff
+    sh $v0, 0x18($v1)
+
+    skipPersonaLock: j 0x002d7f84
+    nop
+ASM_END
+
+
+ASM_START 0x0017528c
+    j 0x009D5940
+    nop
+ASM_END
+
+ASM_START SavePreviousPersonaBeforeSwitch
+    lui $v1, 0x009d
+    lb $v1, 0x58B0($v1) // Load persona switch flag
+
+    bne $v1, $zero, dontSavePersona
+    nop
+    lui $v0, 0x83
+    lh $v0, 0x6ba8($v0) // Get current persona index
+    lui $v1, 0x009d
+    sh $v0, 0x58B4($v1) // Save current persona index into our global
+
+    dontSavePersona: lui $v0, 0x83
+    sh $s1, 0x6ba8($v0)
+
+    j 0x00175294
+    nop
+ASM_END
+
+ASM_START 0x0028AC80
+    j 0x009D5980
+    nop
+ASM_END
+
+ASM_START ResetFlagsOnFullNewTurn
+    lui $v1, 0x009d
+    sb $zero, 0x58B0($v1) // Reset persona switch flag
+    lui $v1, 0x009d
+    sh $zero, 0x58B4($v1) // Reset first persona before switch (Not needed but cleaner like this)
+
+    lbu $v1, 0x29($s4)
+    bne $v1, $zero, originalElse
+    nop
+    j 0x0028aca8
+    nop
+    originalElse: j 0x0028AC8C
+    nop
+ASM_END
