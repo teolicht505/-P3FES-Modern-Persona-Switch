@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>Modern Persona Switch</name>
+  <id>teolicht.modernpersonaswitch</id>
+  <author>teolicht</author>
+  <version>1.0</version>
+  <link>https://gamebanana.com/mods/000000</link>
+  <description>This mod introduces a feature that allows you to switch personas infinitely during a single turn, as long as you don’t use any actions with the current persona.</description>
+</Metadata>
