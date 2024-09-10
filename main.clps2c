@@ -96,8 +96,8 @@ ASM_START ResetFlagsOnFullNewTurn
     lbu $v1, 0x29($s4)
     bne $v1, $zero, originalElse
     nop
-    j 0x0028aca8
+    j 0x0028ac8c
     nop
-    originalElse: j 0x0028AC8C
+    originalElse: j 0x0028aca8
     nop
 ASM_END
