@@ -2,6 +2,7 @@ set PersonaSwitchFlagSet 0x009D58C0
 set OneMoreLockPersonaSwitch 0x009D5900
 set SavePreviousPersonaBeforeSwitch 0x009D5940
 set ResetFlagsOnFullNewTurn 0x009D5980
+set ChangeOriginalPersonaColor 0x009D59D0
 
 // Persona switch flag (0x009D58B0)
 // First persona before switch (0x009D58B4)
@@ -99,5 +100,62 @@ ASM_START ResetFlagsOnFullNewTurn
     j 0x0028ac8c
     nop
     originalElse: j 0x0028aca8
+    nop
+ASM_END
+
+
+ASM_START 0x00203F3C
+    j 0x009D59D0
+    nop
+ASM_END
+
+ASM_START ChangeOriginalPersonaColor
+    bne $v0, $s0, checkOriginalPersona
+    nop
+    j 0x00203F44 // Original yellow color set for current selected persona
+    nop
+    checkOriginalPersona: addiu $sp, $sp, -0x10
+    sd $v0, 0x0($sp)
+    
+    lui $v1, 0x009d
+    lh $v1, 0x58B0($v1) // Load persona switch flag
+    beq $v1, $zero, specialColorEnd
+    nop
+
+    lui $v1, 0x009d
+    lh $a0, 0x58B4($v1) // Load persona index before switch
+    jal 0x00174a90 // Get persona structure itself -> $v0
+    nop
+
+    lhu $v1, 0x2($v0) // Get persona before switch id
+    ld $v0, 0x0($sp) // Get current print iteration persona id
+
+    bne $v0, $v1, specialColorEnd // It's a not selected persona
+    nop
+
+    lw $v0,0x76CC($s1)
+    sub $v0,$v0,$v1
+    beq $s2,$v0,elementSelected // Check whether the current cursor is under the original equipped persona
+    nop
+
+    daddu $a0,$s3,$zero
+    lui $v0,0x7886 // Color of unselected persona
+    ori $a1,$v0,0xFFFF
+    jal 0x003b0e20
+    nop 
+
+    beq $zero,$zero,blueColorEnd
+    nop 
+    elementSelected: daddu $a0,$s3,$zero
+    lui $v0,0x2834 // Color of selected persona
+    ori $a1,$v0,0x78FF
+    jal 0x003b0e20
+    nop
+    
+    blueColorEnd: j 0x00203F9C
+    addiu $sp, $sp, 0x10
+
+    specialColorEnd: addiu $sp, $sp, 0x10
+    j 0x00203F8C
     nop
 ASM_END
